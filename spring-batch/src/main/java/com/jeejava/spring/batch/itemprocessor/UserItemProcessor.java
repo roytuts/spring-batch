@@ -1,11 +1,9 @@
 package com.jeejava.spring.batch.itemprocessor;
 
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.stereotype.Component;
 
 import com.jeejava.spring.batch.vo.User;
 
-@Component
 public class UserItemProcessor implements ItemProcessor<User, User> {
 
 	@Override
