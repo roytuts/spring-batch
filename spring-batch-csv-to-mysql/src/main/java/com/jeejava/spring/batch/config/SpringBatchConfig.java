@@ -29,6 +29,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 
 import com.jeejava.spring.batch.itemprocessor.PersonItemProcessor;
 import com.jeejava.spring.batch.vo.Person;
@@ -56,6 +58,12 @@ public class SpringBatchConfig {
 		dataSource.setUrl("jdbc:mysql://localhost:3306/jeejava");
 		dataSource.setUsername("root");
 		dataSource.setPassword("");
+
+		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
+		databasePopulator.addScript(new ClassPathResource("org/springframework/batch/core/schema-drop-mysql.sql"));
+		databasePopulator.addScript(new ClassPathResource("org/springframework/batch/core/schema-mysql.sql"));
+
+		DatabasePopulatorUtils.execute(databasePopulator, dataSource);
 		return dataSource;
 	}
 
