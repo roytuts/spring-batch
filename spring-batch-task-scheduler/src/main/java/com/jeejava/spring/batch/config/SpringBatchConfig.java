@@ -15,10 +15,12 @@ import org.springframework.batch.core.repository.support.JobRepositoryFactoryBea
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
+import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
+import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
-import org.springframework.batch.item.xml.StaxEventItemWriter;
 import org.springframework.batch.support.DatabaseType;
 import org.springframework.batch.support.transaction.ResourcelessTransactionManager;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -26,11 +28,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 
-import com.jeejava.spring.batch.fieldset.mapper.PersonFieldSetMapper;
 import com.jeejava.spring.batch.itemprocessor.PersonItemProcessor;
 import com.jeejava.spring.batch.vo.Person;
 
@@ -57,6 +58,12 @@ public class SpringBatchConfig {
 		dataSource.setUrl("jdbc:mysql://localhost:3306/jeejava");
 		dataSource.setUsername("root");
 		dataSource.setPassword("");
+
+		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
+		databasePopulator.addScript(new ClassPathResource("org/springframework/batch/core/schema-drop-mysql.sql"));
+		databasePopulator.addScript(new ClassPathResource("org/springframework/batch/core/schema-mysql.sql"));
+
+		DatabasePopulatorUtils.execute(databasePopulator, dataSource);
 		return dataSource;
 	}
 
@@ -83,15 +90,14 @@ public class SpringBatchConfig {
 	}
 
 	@Bean
-	public Jaxb2Marshaller jaxb2Marshaller() {
-		Jaxb2Marshaller jaxb2Marshaller = new Jaxb2Marshaller();
-		jaxb2Marshaller.setClassesToBeBound(Person.class);
-
-		return jaxb2Marshaller;
+	public BeanWrapperFieldSetMapper<Person> beanWrapperFieldSetMapper() {
+		BeanWrapperFieldSetMapper<Person> fieldSetMapper = new BeanWrapperFieldSetMapper<>();
+		fieldSetMapper.setPrototypeBeanName("person");
+		return fieldSetMapper;
 	}
 
 	@Bean
-	public FlatFileItemReader<Person> fileItemReader() {
+	public FlatFileItemReader<Person> fileItemReader(BeanWrapperFieldSetMapper<Person> beanWrapperFieldSetMapper) {
 		FlatFileItemReader<Person> fileItemReader = new FlatFileItemReader<>();
 		fileItemReader.setResource(new ClassPathResource("person.csv"));
 
@@ -100,26 +106,32 @@ public class SpringBatchConfig {
 
 		DefaultLineMapper<Person> defaultLineMapper = new DefaultLineMapper<>();
 		defaultLineMapper.setLineTokenizer(delimitedLineTokenizer);
-		defaultLineMapper.setFieldSetMapper(new PersonFieldSetMapper());
+		defaultLineMapper.setFieldSetMapper(beanWrapperFieldSetMapper);
 
 		fileItemReader.setLineMapper(defaultLineMapper);
 
 		return fileItemReader;
 	}
 
-	@Bean(destroyMethod = "")
-	public StaxEventItemWriter<Person> staxEventItemWriter(Jaxb2Marshaller marshaller) {
-		StaxEventItemWriter<Person> staxEventItemWriter = new StaxEventItemWriter<>();
-		staxEventItemWriter.setResource(new FileSystemResource("C:/workspace/person.xml"));
-		staxEventItemWriter.setMarshaller(marshaller);
-		staxEventItemWriter.setRootTagName("personInfo");
+	@Bean
+	public JdbcBatchItemWriter<Person> jdbcBatchItemWriter(DataSource dataSource,
+			BeanPropertyItemSqlParameterSourceProvider<Person> sqlParameterSourceProvider) {
+		JdbcBatchItemWriter<Person> jdbcBatchItemWriter = new JdbcBatchItemWriter<>();
+		jdbcBatchItemWriter.setDataSource(dataSource);
+		jdbcBatchItemWriter.setItemSqlParameterSourceProvider(sqlParameterSourceProvider);
+		jdbcBatchItemWriter.setSql("insert into person(id,firstName,lastName) values (:id, :firstName, :lastName)");
 
-		return staxEventItemWriter;
+		return jdbcBatchItemWriter;
 	}
 
 	@Bean
-	public Job jobCsvXml(JobBuilderFactory jobBuilderFactory, Step step) {
-		return jobBuilderFactory.get("jobCsvXml").incrementer(new RunIdIncrementer()).flow(step).end().build();
+	public BeanPropertyItemSqlParameterSourceProvider<Person> beanPropertyItemSqlParameterSourceProvider() {
+		return new BeanPropertyItemSqlParameterSourceProvider<>();
+	}
+
+	@Bean
+	public Job jobCsvMysql(JobBuilderFactory jobBuilderFactory, Step step) {
+		return jobBuilderFactory.get("jobCsvMysql").incrementer(new RunIdIncrementer()).flow(step).end().build();
 	}
 
 	@Bean
@@ -128,5 +140,5 @@ public class SpringBatchConfig {
 		return stepBuilderFactory.get("step1").transactionManager(transactionManager).<Person, Person>chunk(2)
 				.reader(reader).processor(processor).writer(writer).build();
 	}
-	
+
 }
