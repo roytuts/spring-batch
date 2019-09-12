@@ -1,1 +1,1 @@
-You can read tutorial https://www.jeejava.com/spring-batch-taskscheduler/
+You can read tutorial https://www.roytuts.com/spring-batch-taskscheduler/

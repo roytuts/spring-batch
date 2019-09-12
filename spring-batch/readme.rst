@@ -1,1 +1,1 @@
-You can read tutorial https://www.jeejava.com/category/spring-batch/
+You can read tutorial https://www.roytuts.com/category/spring-batch/

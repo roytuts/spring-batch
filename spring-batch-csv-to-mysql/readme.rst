@@ -1,1 +1,1 @@
-You can read tutorial https://www.jeejava.com/spring-batch-csv-to-mysql-database/
+You can read tutorial https://www.roytuts.com/spring-batch-csv-to-mysql-database/

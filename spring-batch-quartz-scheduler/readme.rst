@@ -1,1 +1,1 @@
-You can read tutorial https://www.jeejava.com/spring-batch-quartz-scheduler/
+You can read tutorial https://www.roytuts.com/spring-batch-quartz-scheduler/
