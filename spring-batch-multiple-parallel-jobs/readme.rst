@@ -1,0 +1,1 @@
+You can read tutorial https://roytuts.com/spring-batch-scheduling-multiple-jobs-parallelly/
