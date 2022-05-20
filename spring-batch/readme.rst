@@ -1,1 +1,1 @@
-You can read tutorial https://www.roytuts.com/category/spring-batch/
+Please follow the tutorial https://roytuts.com/category/spring-batch/
