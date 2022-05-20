@@ -1,1 +1,1 @@
-You can read tutorial https://www.roytuts.com/spring-batch-csv-to-xml-file/
+Please follow the tutorial https://roytuts.com/spring-batch-csv-to-xml-file/
