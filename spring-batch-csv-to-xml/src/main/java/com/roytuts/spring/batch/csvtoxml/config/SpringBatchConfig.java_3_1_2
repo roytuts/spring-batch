@@ -20,10 +20,13 @@ import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.batch.item.xml.StaxEventItemWriter;
 import org.springframework.batch.support.DatabaseType;
 import org.springframework.batch.support.transaction.ResourcelessTransactionManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
@@ -39,6 +42,9 @@ import com.roytuts.spring.batch.csvtoxml.vo.Person;
 
 @Configuration
 public class SpringBatchConfig {
+	
+	@Autowired
+	private Environment environment;
 
 	@Bean
 	@Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
@@ -52,12 +58,20 @@ public class SpringBatchConfig {
 		return new PersonItemProcessor();
 	}
 
-	@Bean
+	/*@Bean
 	public DataSource dataSource() {
 		EmbeddedDatabaseBuilder embeddedDatabaseBuilder = new EmbeddedDatabaseBuilder();
 		return embeddedDatabaseBuilder.addScript("classpath:org/springframework/batch/core/schema-drop-h2.sql")
 				.addScript("classpath:org/springframework/batch/core/schema-h2.sql").setType(EmbeddedDatabaseType.H2)
 				.build();
+	}*/
+	
+	@Bean
+	public DataSource dataSource() {
+		return DataSourceBuilder.create().driverClassName(environment.getProperty("spring.datasource.driverClassName"))
+				.url(environment.getProperty("spring.datasource.url"))
+				.username(environment.getProperty("spring.datasource.username"))
+				.password(environment.getProperty("spring.datasource.password")).build();
 	}
 
 	@Bean
