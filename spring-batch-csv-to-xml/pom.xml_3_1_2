@@ -40,9 +40,15 @@
 			<artifactId>jaxb-runtime</artifactId>
 		</dependency>
 
-		<dependency>
+		<!--<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
+		</dependency>-->
+		
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>8.0.31</version>
 		</dependency>
 	</dependencies>
 
