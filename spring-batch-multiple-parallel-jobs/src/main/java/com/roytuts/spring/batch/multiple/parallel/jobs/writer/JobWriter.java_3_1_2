@@ -1,0 +1,24 @@
+package com.roytuts.spring.batch.multiple.parallel.jobs.writer;
+
+import org.springframework.batch.item.Chunk;
+import org.springframework.batch.item.ItemWriter;
+
+import com.roytuts.spring.batch.multiple.parallel.jobs.model.Item;
+
+public class JobWriter implements ItemWriter<Item> {
+
+	private Item item = new Item();
+
+	@Override
+	public void write(Chunk<? extends Item> chunk) throws Exception {
+		System.out.println("JobWriter::write() -> item: " + item);
+
+		item.setId(chunk.getItems().get(0).getId());
+		item.setDate(chunk.getItems().get(0).getDate());
+	}
+
+	public Item getOutput() {
+		return item;
+	}
+	
+}
