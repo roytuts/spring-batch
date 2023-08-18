@@ -1,0 +1,23 @@
+package com.roytuts.spring.batch.multiple.parallel.jobs.listener;
+
+import org.springframework.batch.core.ItemWriteListener;
+import org.springframework.batch.item.Chunk;
+
+public class WriteListener<S> implements ItemWriteListener<S> {
+
+	@Override
+	public void beforeWrite(Chunk<? extends S> chunk) {
+		System.out.println("ReaderListener::beforeWrite() -> " + chunk);
+	}
+
+	@Override
+	public void afterWrite(Chunk<? extends S> chunk) {
+		System.out.println("ReaderListener::afterWrite() -> " + chunk);
+	}
+
+	@Override
+	public void onWriteError(Exception exception, Chunk<? extends S> chunk) {
+		System.out.println("ReaderListener::onWriteError() -> " + exception + ", " + chunk);
+	}
+
+}
